@@ -1,10 +1,66 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template_string, request
 import sys
 import io
 
 app = Flask(__name__)
 
-# Главная страница
+# HTML-шаблон для страницы
+html_template = '''
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рабочая Площадь Python</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Рабочая Площадь Python</h1>
+    <form method="post">
+        <textarea name="user_code" placeholder="Введите код Python здесь..."></textarea><br>
+        <button type="submit">Выполнить</button>
+    </form>
+
+    {% if result %}
+        <h3>Результат выполнения:</h3>
+        <pre>{{ result }}</pre>
+    {% endif %}
+
+</body>
+</html>
+'''
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = ""
@@ -18,8 +74,8 @@ def index():
             result = sys.stdout.getvalue()  # Получаем результат выполнения
             sys.stdout = old_stdout  # Восстановление вывода
         except Exception as e:
-            result = str(e)  # Если ошибка, выводим её
-    return render_template('index.html', result=result)
+            result = f"Ошибка выполнения: {e}"  # Если ошибка, выводим её
+    return render_template_string(html_template, result=result)
 
 if __name__ == '__main__':
     app.run(debug=True)
